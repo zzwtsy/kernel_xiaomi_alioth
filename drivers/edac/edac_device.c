@@ -387,16 +387,8 @@ static void edac_device_workq_setup(struct edac_device_ctl_info *edac_dev,
 
 	/* take the arg 'msec' and set it into the control structure
 	 * to used in the time period calculation
-	 * then calc the number of jiffies that represents. Also, force
-	 * polling period to 1 second if it is smaller than that, as
-	 * anything less than 1 second does not make sense.
+	 * then calc the number of jiffies that represents
 	 */
-	if (msec <= 1000) {
-		edac_device_printk(edac_dev, KERN_WARNING,
-				   "Forcing polling period to 1 second\n");
-		msec = 1000;
-	}
-
 	edac_dev->poll_msec = msec;
 	edac_dev->delay = msecs_to_jiffies(msec);
 

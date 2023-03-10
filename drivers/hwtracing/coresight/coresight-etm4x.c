@@ -1489,23 +1489,15 @@ static int etm4_probe(struct amba_device *adev, const struct amba_id *id)
 		ret = -EINVAL;
 		goto err_arch_supported;
 	}
-	if (!etm4_count++) {
-		cpuhp_setup_state_nocalls_cpuslocked(CPUHP_AP_ARM_CORESIGHT_STARTING,
-						     "arm/coresight4:starting",
-						     etm4_starting_cpu, etm4_dying_cpu);
-		ret = cpuhp_setup_state_nocalls_cpuslocked(CPUHP_AP_ONLINE_DYN,
-							   "arm/coresight4:online",
-							   etm4_online_cpu, NULL);
-		if (ret < 0)
-			goto err_arch_supported;
-		hp_online = ret;
 
-		ret = etm4_pm_setup_cpuslocked();
-		if (ret)
-			goto err_arch_supported;
-	}
-
+	ret = etm4_pm_setup_cpuslocked();
 	cpus_read_unlock();
+
+	/* etm4_pm_setup_cpuslocked() does its own cleanup - exit on error */
+	if (ret) {
+		etmdrvdata[drvdata->cpu] = NULL;
+		return ret;
+	}
 
 	etm4_init_trace_id(drvdata);
 	etm4_set_default(&drvdata->config);
